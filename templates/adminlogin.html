@@ -1,0 +1,20 @@
+{% extends "adminlayout.html" %}
+
+{% block title %}
+    Admin Login
+{% endblock %}
+
+<!--Nothing its just a copy from my login.html page which is also a copy from the cs50's finance problem login.hmtl file-->
+{% block main %}
+    <div class="d-flex align-items-center justify-content-center min-vh-100">
+        <form id="login" action="/admin/login" method="post" class="max-width">
+            <div class="mb-3">
+                <input type="text" name="adminid" class="form-control w-100" id="phone" placeholder="Admin id" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" placeholder="Password" class="form-control w-100" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+    </div>
+{% endblock %}

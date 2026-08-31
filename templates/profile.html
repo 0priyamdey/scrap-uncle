@@ -1,0 +1,157 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+<div class='container p-4'>
+    <div>
+        <!--todo-->
+    </div>
+
+    <div class='card px-3 py-2'>
+        <div class='d-flex justify-content-between align-items-center'>
+            <h6>👤 Personal details</h6>
+            <button class='btn btn-sm btn-success rounded-pill px-3 m-2' data-bs-toggle='modal' data-bs-target='#editDetails'>
+                <span>Edit</span>
+            </button>
+        </div>
+
+        <div class='d-flex flex-column gap-3'>
+            <div class='py-2 px-3 rounded-3 bg-light'>
+                <span class='d-block text-muted small'>Name</span>
+                <span class='fw-semibold text-dark'>{{ details.name }}</span>
+            </div>
+
+            <div class='py-2 px-3 rounded-3 bg-light'>
+                <span class='d-block text-muted small'>Email</span>
+                <span class='fw-semibold text-dark'>{{ details.email }}</span>
+            </div>
+
+            <div class='py-2 px-3 rounded-3 bg-light'>
+                <span class='d-block text-muted small'>Contact</span>
+                <span class='fw-semibold text-dark'>{{ details.phone }}</span>
+            </div>
+
+            <div class='py-2 px-3 rounded-3 bg-light'>
+                <span class='d-block text-muted small'>Password</span>
+                <span class='fw-semibold text-dark'>********</span>
+            </div>
+        </div>
+    </div>
+
+    <div class='card px-3 py-2 my-4'>
+        <div class='d-flex justify-content-between align-items-center'>
+            <h6>📍Address details</h6>
+            <button class='btn btn-success px-3 rounded-pill btn-sm m-2' data-bs-toggle='modal' data-bs-target='#addAddress'>
+                Add address +
+            </button>
+        </div>
+
+        <div class='d-flex flex-column gap-3'>
+            {% for address in addresses %}
+            <div class='card bg-light border-success-subtle rounded-3 px-3 py-2'>
+                <div class='d-flex justify-content-between align-items-center'>
+                    <div class="text-muted small fw-bold">{{ address.city }}, {{ address.state }}</div>
+                    {% if addresses|length > 1 %}
+                    <form action="/profile/address/delete" method="POST" class="m-0">
+                        <input type='hidden' value='{{ address.aid }}' name=aid>
+                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small border-danger px-1 py-0 m-1 fs-8">
+                            ✕
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="text-dark fw-medium">{{ address.address }} - {{ address.pincode }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class='d-flex justify-content-center flex-column flex-md-row'>
+        <a class='btn border-danger-subtle px-3 py-1 rounded-pill btn-danger' href='/logout'>
+            Log out!
+        </a>
+    </div>
+
+</div>
+
+<div class='modal fade' id='editDetails' tabindex='-1' aria-hidden='true'>
+    <div class='modal-dialog modal-dialog-centered'>
+        <div class='modal-content rounded-4 border-0 p-2 m-3'>
+
+            <div class='modal-header border-0 pb-0'>
+                <h6>Edit details</h6>
+                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='close'></button>
+            </div>
+
+            <form action='/profile/update' method='post'>
+                <div class='modal-body d-flex flex-column gap-2'>
+                    <div>
+                        <label class='form-label small text-muted'>Name</label>
+                        <input type='text' name='name' class='form-control rounded-3' placeholder='{{ details.name }}'>
+                    </div>
+                    <div>
+                        <label class='form-label small text-muted'>Email</label>
+                        <input type='email' name='email' class='form-control rounded-3' placeholder='{{ details.email }}'>
+                    </div>
+                    <div>
+                        <label>New password (Optional)</label>
+                        <input type='password' name='newPassword' class='form-control rounded-3'>
+                    </div>
+                    <div>
+                        <label>Password</label>
+                        <input type='password' name='curPassword' class='form-control rounded-3' required>
+                    </div>
+                </div>
+
+                <div class='modal-footer border-0 pt-0'>
+                    <button type='button' class='rounded-pill border-success-subtle bg-light text-dark px-3 py-1 btn' data-bs-dismiss='modal'>Cancel</button>
+                    <button type='submit' class='rounded-pill bg-success px-3 py-1 btn text-light'>Save Changes</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class='modal fade' id='addAddress' tabindex='-1' aria-hidden='true'>
+    <div class='modal-dialog modal-dialog-centered'>
+        <div class='modal-content rounded-4 border-0 p-2 m-3'>
+
+            <div class='modal-header border-0 pb-0'>
+                <h6>Edit details</h6>
+                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='close'></button>
+            </div>
+
+            <form action='/profile/addaddress' method='post'>
+                <div class='modal-body d-flex flex-column gap-2'>
+                    <div>
+                        <label class='form-label small text-muted'>State</label>
+                        <input type='text' name='state' class='form-control rounded-3' required>
+                    </div>
+                    <div>
+                        <label class='form-label small text-muted'>City</label>
+                        <input type='text' name='city' class='form-control rounded-3' required>
+                    </div>
+                    <div>
+                        <label>Address</label>
+                        <textarea type='text' name='address' class='form-control rounded-3' required></textarea>
+                    </div>
+                    <div>
+                        <label>Pincode</label>
+                        <input type='text' pattern="[0-9]*" maxlength='6' inputmode='numeric' name='pincode' class='form-control rounded-3' required>
+                    </div>
+                </div>
+
+                <div class='modal-footer border-0 pt-0'>
+                    <button type='button' class='rounded-pill border-success-subtle bg-light text-dark px-3 py-1 btn' data-bs-dismiss='modal'>Cancel</button>
+                    <button type='submit' class='rounded-pill bg-success px-3 py-1 btn text-light'>Save Changes</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

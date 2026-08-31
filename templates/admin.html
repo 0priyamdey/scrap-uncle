@@ -1,0 +1,154 @@
+{% extends "adminlayout.html" %}
+
+{% block title %}
+    Admin
+{% endblock %}
+
+{% block main %}
+    <div class='container p-4'>
+        <h3 class='m-2 d-flex justify-content-center fw-bold text-success'>Orders</h3>
+        <div class='table-responsive'>
+            <table class='table table-striped-columns border-dark table-hover table-bordered text-nowrap'>
+                <thead>
+                    <tr>
+                        <th>Order Id</th>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Pickup Date</th>
+                        <th>Time Slot</th>
+                        <th>Vehicle Type</th>
+                        <th>Estimated Weight</th>
+                        <th>Status</th>
+                        <th>Order Created</th>
+                        <th>Category</th>
+                        <th>Rate/kg</th>
+                        <th>Weight Collected</th>
+                        <th>Total Amount</th>
+                        <th>Settled Date</th>
+                        <th>Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody class='table-group-divider'>
+                    {% for order in orders %}
+                        <tr class="table-{{ 'primary' if order.status == 'Pending' or order.status == 'Scheduled'  else 'success'  }}">
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.name }}</td>
+                            <td>{{ order.phone }}</td>
+                            <td>{{ order.email }}</td>
+                            <td>{{ order.pickup_date }}</td>
+                            <td>{{ order.time_slot }}</td>
+                            <td>{{ order.vehicle_type }}</td>
+                            <td>{{ order.estimated_weight }}</td>
+                            <td>{{ order.status }}</td>
+                            <td>{{ order.created_at }}</td>
+                            <td>{{ order.category }}</td>
+                            <td>{{ order.rate_per_kg }}</td>
+                            <td>{{ order.weight_collected }}</td>
+                            <td>{{ order.total_amount }}</td>
+                            <td>{{ order.setteled_date }}</td>
+                            <td>{{ order.city }}, {{ order.state }}, {{ order.address }}-{{ order.pincode }}</td>
+                            <td>
+                                <button class='btn py-0 btn-success'
+                                        data-bs-toggle='modal'
+                                        data-bs-target='#edit'
+                                        data-user-info = "{{ order.name }} ({{ order.phone }})"
+                                        data-order-id="{{ order.order_id }}"
+                                        data-status="{{ order.status }}"
+                                        data-category="{{ order.category }}"
+                                        data-rate="{{ order.rate_per_kg }}"
+                                        data-weight="{{ order.weight_collected }}"
+                                        data-settled="{{ order.setteled_date }}">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+<!-- this is the part of that same peice of code that i mentioned in update.js file and I took it heavly from the internet ai and google
+although this not just a simple copy and paste thing that I have done but mostly I took that inspiration from the internet,
+I already new about the modal window thing from working with it on past html pages i.e. in profile page but here the implementation is a bit different and tough,
+its a bit tricky use of the modal I would say incorporating javascript with it to make it work, and AI help was very healpfull and insightfull at the same time. -->
+    <div class='modal fade' id='edit' tabindex='-1' aria-hidden='true'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <form action="/admin" method="POST">
+                    <input type="hidden" name="order_id" id="modalOrderId">
+
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold">Update Order <span id="modalTitleOrderId"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body py-3">
+                    <!-- Customer Summary Banner -->
+                        <div class="p-3 bg-light rounded-3 mb-3 small">
+                            <span class="fw-semibold text-dark" id="modalUserInfo"></span><br>
+                            <span class="fw-semibold text-dark" id="modalOrderInfo"></span>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted">Order Status</label>
+                                <select name="status" id="modalStatus" class="form-select rounded-3">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted">Scrap Category</label>
+                                <select name="category" id="modalCategory" class="form-select rounded-3">
+                                    <option value="plastic">Plastic</option>
+                                    <option value="metal">Metal</option>
+                                    <option value="glass">Glass</option>
+                                    <option value="paper">Paper</option>
+                                    <option value="electronic">Electronic</option>
+                                    <option value="mixed">Mixed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted">Rate / kg (₹)</label>
+                                <input type="number" step="0.01" name="rate" id="modalRate" class="form-control rounded-3" placeholder="0.00">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted">Collected Wt (kg)</label>
+                                <input type="number" step="0.01" name="weight" id="modalWeight" class="form-control rounded-3" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class='col-6'>
+                                <label class="form-label small fw-semibold text-muted">Total Amount</label>
+                                <input type="number" step="0.01" name="totalAmount" id="modalTotal" class="form-control rounded-3" placeholder="0.00">
+                            </div>
+                            <div class='col-6'>
+                                <label class="form-label small fw-semibold text-muted">Settled Date</label>
+                                <input type="date" name="settledAt" id="modalSettled" class="form-control rounded-3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-dark rounded-pill px-4 fw-semibold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-- though in AI it was a single page html and javascript thing, but I segregated them to keep it clean and more elegant. -->
+    <script src='static/js/update.js'></script>
+{% endblock %}

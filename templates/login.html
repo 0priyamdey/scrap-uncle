@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block main %}
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <form id="login" action="/login" method="post" class="max-width">
+        <div class="text-center">
+            <img src="..." class="rounded max-width" id="login-logo" alt="...">
+        </div>
+        <div class="mb-3">
+            <input type="tel" name="phone" class="form-control w-100" id="phone" placeholder="Phone Number" aria-describedby="phoneFormatHelp" pattern="[0-9]{5}[0-9]{5}" required>
+        </div>
+        <div class="mb-3">
+            <input type="password" name="password" placeholder="Password" class="form-control w-100" id="password" required>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" name="remember" class="form-check-input" id="signedin-check">
+            <label class="form-check-label" for="signedin-check">Keep me signed in</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Log in</button>
+        <p class="m-3">Don't have an account <a href="/register">Sign up</a></p>
+    </form>
+</div>
+
+{% endblock %}

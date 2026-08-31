@@ -1,0 +1,111 @@
+{% extends "layout.html"%}
+
+{% block title %}
+    PlaceOrder
+{% endblock %}
+
+{% block main %}
+<div class="p-4">
+
+    <form action="/placeorder" method="post">
+        <div class="row row-cols-3 row-cols-md-6 g-2 g-md-3 mb-3">
+            {% set categories = ['plastic', 'metal', 'paper', 'glass', 'electronic', 'mixed'] %}
+            {% for file in categories %}
+            <div class='col'>
+                <input type='radio' id='cat_{{ file }}' class='btn-check' value='{{ file }}' name='category' autocomplete='off' required>
+                <label class="btn btn-outline-success w-100 h-100 p-3 rounded-3 d-flex flex-column align-items-center justify-content-center text-dark border" for="cat_{{ file }}">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <img src="/static/images/{{ file }}.svg" alt="{{ file }}" class="img-fluid">
+                    </div>
+                    <span class="small fw-semibold">{{ file.upper() }}</span>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class='row row-cols-1 row-cols-md-2'>
+            <div>
+                <div>
+                    <h5 class="fw-bold mb-3">Estimated Weight</h5>
+                    <div class="card p-3 mb-4 border bg-light rounded-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="weightRange" class="form-label mb-0 fw-semibold">Slide to select weight:</label>
+                            <span class="badge bg-success fs-6"><span id="weightDisplay">10</span> kg</span>
+                        </div>
+                        <!-- Range Slider (min 5kg, max 200kg, step 5kg) -->
+                        <input type="range" class="form-range" min="5" max="200" step="5" value="10" id="weightRange" name="weight" oninput="document.getElementById('weightDisplay').innerText = this.value">
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>5 kg</span>
+                            <span>100 kg</span>
+                            <span>200+ kg</span>
+                        </div>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-1">Select Date & Time</h5>
+                <div class="row g-3 mb-4 d-flex align-items-center">
+                    <!-- Calendar Date Picker -->
+                    <div class="col-12 col-md-6">
+                        <label for="pickupDate" class="form-label small fw-semibold text-muted">Pickup Date</label>
+                        <input type="date" id="pickupDate" class="form-control py-2" name="pickup_date" required>
+                    </div>
+
+                    <!-- Time Slot Buttons -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-muted">Time Slot</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="time_slot" id="slot1" value="Morning (9 AM - 12 PM)" required>
+                            <label class="btn btn-outline-secondary w-100 small py-2" for="slot1">9AM - 12PM</label>
+
+                            <input type="radio" class="btn-check" name="time_slot" id="slot2" value="Afternoon (12 PM - 3 PM)">
+                            <label class="btn btn-outline-secondary w-100 small py-2" for="slot2">12PM - 3PM</label>
+
+                            <input type="radio" class="btn-check" name="time_slot" id="slot3" value="Evening (3 PM - 6 PM)">
+                            <label class="btn btn-outline-secondary w-100 small py-2" for="slot3">3PM - 6PM</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h5 class="fw-bold mb-3">Choose Pickup Option</h5>
+                <div class="row row-cols-3 g-2 g-md-3 mb-4">
+                    {% set vehicles = [
+                        ('canter', 'Three-Wheeler', 'Up to 20 kg'),
+                        ('pickup', 'Pickup Truck', '20 - 100 kg'),
+                        ('truck', 'Mini Truck', 'Above 100 kg')
+                    ] %}
+
+                    {% for id, title, subtitle in vehicles %}
+                    <div class="col" id='car'>
+                        <input type="radio" id="veh_{{ id }}" class="btn-check" value="{{ id }}" name="vehicle" autocomplete="off" required>
+                        <label class="btn btn-outline-success w-100 p-3 rounded-3 d-flex h-100 flex-column align-items-center justify-content-between text-dark border text-start" for="veh_{{ id }}">
+                            <img src="/static/images/{{ id }}.svg" alt="{{ title }}" class="mx-auto img-fluid">
+                            <div class='w-100 text-center'>
+                                <div class="fw-bold small">{{ title }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ subtitle }}</div>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3">Pickup Address</h5>
+        <div class="mb-4">
+            <select class="form-select py-2 text-truncate w-100" name="address" required>
+                 <option selected disabled>Select address</option>
+                 {% for address in addresses %}
+                    <option value="{{ address.aid }}" >{{ address.state.capitalize() }}, {{ address.city.capitalize() }}, {{ address.address.capitalize() }}, {{ address.pincode }}</option>
+                 {% endfor %}
+            </select>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success btn-lg w-100 fw-semibold rounded-pill py-2 shadow-sm">
+                Confirm & Place Order
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title%}
+    register
+{% endblock %}
+
+{% block main %}
+<div class="d-flex align-items-center justify-content-center min-vh-100">
+    <form id="register" action="/register" method="post" class="max-width">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <input type="text" name="name" placeholder="Name" class="form-control w-100" id="register-name" required>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="tel" name="phone" class="form-control w-100" id="phone" placeholder="Phone Number" aria-describedby="phoneFormatHelp" pattern="[0-9]{5}[0-9]{5}" required>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="email" name="email" placeholder="Email" class="form-control w-100" id="email">
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="text" name="state" placeholder="State" class="form-control w-100" id="state" required>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="text" name="city" placeholder="City" class="form-control w-100" id="city" required>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="text" name="pin" placeholder="Pincode" class="form-control w-100" id="pin" required>
+            </div>
+            <div class="col-12">
+                <textarea name="address" placeholder="Address" class="form-control w-100" id="address" required></textarea>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="password" name="password" placeholder="Password" class="form-control w-100" id="password" required>
+            </div>
+            <div class="col-12 col-md-6">
+                <input type="password" name="confirmPassword" placeholder="Confirm password" class="form-control w-100" id="confirm-password" required>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100">Log in</button>
+                <p class="m-3">Already have an account <a href="/login">Log in</a></p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
