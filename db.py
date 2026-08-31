@@ -13,12 +13,49 @@ Usage:
 import os
 import re
 import sqlite3
+import urllib.parse
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.pool import QueuePool
 
 load_dotenv()
+
+
+def parse_database_url(url_str: str):
+    """
+    Robustly parse database URLs, handling:
+    - Accidental quotes or 'DATABASE_URL=' prefix
+    - Unencoded or encoded special characters in passwords (e.g. '@', '%40')
+    - postgres:// -> postgresql:// alias
+    """
+    url_str = url_str.strip().strip("\"'").strip()
+    if url_str.startswith("DATABASE_URL="):
+        url_str = url_str[len("DATABASE_URL="):].strip().strip("\"'").strip()
+
+    if not url_str or url_str.startswith("sqlite:"):
+        return url_str
+
+    # Extract components: postgresql://[user]:[password]@[host]:[port]/[database]
+    pattern = r"^(?:postgresql|postgres)(?:\+[a-zA-Z0-9_]+)?:\/\/([^:]+):(.*)@([^:\/\?]+)(?::(\d+))?(?:\/([^?]*))?(?:\?(.*))?$"
+    match = re.match(pattern, url_str)
+    if match:
+        user, raw_pwd, host, port, db_name, query_params = match.groups()
+        clean_pwd = urllib.parse.unquote(raw_pwd)
+        return URL.create(
+            drivername="postgresql+psycopg2",
+            username=user,
+            password=clean_pwd,
+            host=host,
+            port=int(port) if port else 5432,
+            database=db_name if db_name else "postgres",
+        )
+
+    if url_str.startswith("postgres://"):
+        url_str = url_str.replace("postgres://", "postgresql://", 1)
+
+    return make_url(url_str)
 
 
 class Database:
@@ -33,15 +70,12 @@ class Database:
         if self._engine is not None:
             return self._engine
 
-        url = os.environ.get("DATABASE_URL", "").strip()
-        # Clean quotes and accidental 'DATABASE_URL=' prefix
-        url = url.strip("\"'")
-        if url.startswith("DATABASE_URL="):
-            url = url[len("DATABASE_URL="):].strip().strip("\"'")
-
+        raw_url = os.environ.get("DATABASE_URL", "").strip()
         is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
-        if not url:
+        parsed_url = parse_database_url(raw_url) if raw_url else ""
+
+        if not parsed_url:
             if is_serverless:
                 raise RuntimeError(
                     "DATABASE_URL environment variable is missing on Vercel! "
@@ -69,21 +103,18 @@ class Database:
                     cursor.execute("PRAGMA foreign_keys=ON")
                     cursor.close()
         else:
-            # Railway / Supabase / Heroku sometimes provide postgres:// instead of postgresql://
-            if url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql://", 1)
             self._is_postgres = True
 
             if is_serverless:
                 from sqlalchemy.pool import NullPool
                 self._engine = create_engine(
-                    url,
+                    parsed_url,
                     poolclass=NullPool,
                     pool_pre_ping=True,
                 )
             else:
                 self._engine = create_engine(
-                    url,
+                    parsed_url,
                     poolclass=QueuePool,
                     pool_size=5,
                     max_overflow=10,
@@ -107,10 +138,6 @@ class Database:
         For INSERT with RETURNING, returns the value of the first column
         of the first row (typically the auto-generated ID).
         For UPDATE/DELETE, returns the number of affected rows.
-
-        Parameters use :param style for SQLAlchemy text() binding.
-        The method accepts positional args matching ? placeholders in the SQL,
-        which are automatically converted to named :p0, :p1, ... placeholders.
         """
         engine = self._get_engine()
 
