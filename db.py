@@ -34,6 +34,11 @@ class Database:
             return self._engine
 
         url = os.environ.get("DATABASE_URL", "").strip()
+        # Clean quotes and accidental 'DATABASE_URL=' prefix
+        url = url.strip("\"'")
+        if url.startswith("DATABASE_URL="):
+            url = url[len("DATABASE_URL="):].strip().strip("\"'")
+
         is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
         if not url:
