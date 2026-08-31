@@ -33,10 +33,18 @@ class Database:
         if self._engine is not None:
             return self._engine
 
-        url = os.environ.get("DATABASE_URL", "")
+        url = os.environ.get("DATABASE_URL", "").strip()
+        is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 
         if not url:
-            # Fallback to local SQLite for offline development
+            if is_serverless:
+                raise RuntimeError(
+                    "DATABASE_URL environment variable is missing on Vercel! "
+                    "Please add DATABASE_URL in Vercel Project Settings -> Environment Variables, "
+                    "then Redeploy the latest deployment."
+                )
+
+            # Fallback to local SQLite for offline development only
             db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scrap.db")
             url = f"sqlite:///{db_path}"
             self._is_postgres = False
@@ -56,18 +64,27 @@ class Database:
                     cursor.execute("PRAGMA foreign_keys=ON")
                     cursor.close()
         else:
-            # Railway / Heroku sometimes provide postgres:// instead of postgresql://
+            # Railway / Supabase / Heroku sometimes provide postgres:// instead of postgresql://
             if url.startswith("postgres://"):
                 url = url.replace("postgres://", "postgresql://", 1)
             self._is_postgres = True
-            self._engine = create_engine(
-                url,
-                poolclass=QueuePool,
-                pool_size=5,
-                max_overflow=10,
-                pool_pre_ping=True,
-                pool_recycle=300,
-            )
+
+            if is_serverless:
+                from sqlalchemy.pool import NullPool
+                self._engine = create_engine(
+                    url,
+                    poolclass=NullPool,
+                    pool_pre_ping=True,
+                )
+            else:
+                self._engine = create_engine(
+                    url,
+                    poolclass=QueuePool,
+                    pool_size=5,
+                    max_overflow=10,
+                    pool_pre_ping=True,
+                    pool_recycle=300,
+                )
 
         return self._engine
 

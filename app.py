@@ -15,14 +15,6 @@ app = Flask(__name__)
 # ─── Configuration ─────────────────────────────────────────
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-
-# Use Flask-Session only if installed; otherwise fall back to signed cookies
-try:
-    from flask_session import Session
-    Session(app)
-except ImportError:
-    pass  # Signed cookie sessions will be used instead
 
 
 # ─── User Routes ───────────────────────────────────────────
